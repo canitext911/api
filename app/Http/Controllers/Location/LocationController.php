@@ -32,7 +32,7 @@ class LocationController extends Controller
      */
     public function index(Request $request)
     {
-        $clientIp    = $request->get('ip') ?: $_SERVER['REMOTE_ADDR'];
+        $clientIp    = $request->get('ip') ?: $_SERVER['X-Forwarded-For'] ?? $_SERVER['REMOTE_ADDR'];
         $apiEndpoint = str_replace('${IP_ADDR}', $clientIp, $this->apiEndpoint);
 
         $jsonResponse = \file_get_contents($apiEndpoint);
