@@ -2,10 +2,17 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
+    public function boot()
+    {
+        // See https://dev.to/connor11528/deploy-a-laravel-5-app-to-heroku
+        Schema::defaultStringLength(191);
+    }
+
     /**
      * Register any application services.
      *
