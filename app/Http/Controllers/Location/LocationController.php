@@ -44,7 +44,7 @@ class LocationController extends Controller
                 $clientIp = \array_first(explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']));
             }
         }
-        
+
         $apiEndpoint = str_replace('${IP_ADDR}', $clientIp, $this->apiEndpoint);
 
         $jsonResponse = \file_get_contents($apiEndpoint);

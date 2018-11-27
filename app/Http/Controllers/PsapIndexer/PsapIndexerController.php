@@ -41,7 +41,7 @@ class PsapIndexerController extends Controller
                 return \is_string($input) || $input === '';
             },
             'bool'      => function ($input) {
-                return $input === 1 || $input === 0 || $input === true || $input === false || $input === '';
+                return \is_bool($input);
             },
             'date_time' => function ($input) {
                 return $input instanceof \DateTime;
@@ -51,14 +51,27 @@ class PsapIndexerController extends Controller
             }
         ];
 
+        $basicSanitizers = [
+            'trim'   => function ($value) {
+                return \trim($value);
+            },
+            'bool'   => function ($value) {
+                return !!\trim($value);
+            },
+            'string' => function ($value) {
+                return \trim($value ?? '');
+            },
+            'int'    => function ($value) {
+                return \is_numeric($value) ? (int)$value : null;
+            },
+        ];
+
         $this->apiFormat = [
             [
                 'name'        => 'state',
                 'type'        => 'string',
                 'description' => 'Two character state abbreviation',
-                'sanitizer'   => function ($str) {
-                    return \trim($str);
-                },
+                'sanitizer'   => $basicSanitizers['trim'],
                 'validator'   => function ($str) {
                     return \strlen($str) === 2;
                 }
@@ -67,50 +80,55 @@ class PsapIndexerController extends Controller
                 'name'        => 'psap_id',
                 'type'        => 'int',
                 'description' => 'Public Safety Answering Point (PSAP) unique identification number',
-                'validator'   => function ($id) {
-                    return \is_numeric($id);
-                }
+                'sanitizer'   => $basicSanitizers['int'],
+                'validator'   => $basicValidators['int']
             ],
             [
                 'name'        => 'name',
                 'type'        => 'string',
                 'description' => 'PSAP Name',
+                'sanitizer'   => $basicSanitizers['string'],
                 'validator'   => $basicValidators['string']
             ],
             [
                 'name'        => 'county',
                 'type'        => 'string',
                 'description' => 'US county',
+                'sanitizer'   => $basicSanitizers['string'],
                 'validator'   => $basicValidators['string']
             ],
             [
                 'name'        => 'admin_name',
                 'type'        => 'string',
                 'description' => 'Name of person in charge of PSAP',
+                'sanitizer'   => $basicSanitizers['string'],
                 'validator'   => $basicValidators['string']
             ],
             [
                 'name'        => 'admin_title',
                 'type'        => 'string',
                 'description' => 'Title of person in charge of PSAP',
+                'sanitizer'   => $basicSanitizers['string'],
                 'validator'   => $basicValidators['string']
             ],
             [
                 'name'        => 'address',
                 'type'        => 'string',
                 'description' => 'Street address of PSAP',
+                'sanitizer'   => $basicSanitizers['string'],
                 'validator'   => $basicValidators['string']
             ],
             [
                 'name'        => 'city',
                 'type'        => 'string',
                 'description' => 'City of PSAP',
+                'sanitizer'   => $basicSanitizers['string'],
                 'validator'   => $basicValidators['string']
             ],
             [
                 'name'        => 'address_state',
                 'type'        => 'string',
-                'description' => 'Repeat of column one',
+                'description' => 'Repeat of column one, discard this',
                 'validator'   => $basicValidators['string']
             ],
             [
@@ -128,7 +146,6 @@ class PsapIndexerController extends Controller
                     if (\strlen($sanitizedZip) !== 5) {
                         $sanitizedZip = null;
                     }
-
 
                     return $sanitizedZip;
                 },
@@ -160,35 +177,39 @@ class PsapIndexerController extends Controller
             [
                 'name'        => 'phone_secondary',
                 'type'        => 'string|null',
-                'description' => 'Ten-digit hyphen-delimited secondary phone number, may be blank',
+                'description' => 'Ten-digit hyphen-delimited secondary phone number, may be blank. Currently discarded.',
                 'validator'   => $basicValidators['any']
             ],
             [
                 'name'        => 'admin_email',
                 'type'        => 'string',
                 'description' => 'Standard email address contact, may contain multiple separated by 1), 2)',
+                'sanitizer'   => $basicSanitizers['string'],
                 'validator'   => $basicValidators['string']
             ],
             [
                 'name'        => 'supports_tty',
                 'type'        => 'bool',
                 'description' => '',
+                'sanitizer'   => $basicSanitizers['bool'],
                 'validator'   => $basicValidators['bool']
             ],
             [
                 'name'        => 'supports_web',
                 'type'        => 'bool',
                 'description' => '',
+                'sanitizer'   => $basicSanitizers['bool'],
                 'validator'   => $basicValidators['bool']
             ],
             [
                 'name'        => 'supports_ip',
                 'type'        => 'bool',
                 'description' => '',
+                'sanitizer'   => $basicSanitizers['bool'],
                 'validator'   => $basicValidators['bool']
             ],
             [
-                'name'        => 'description',
+                'name'        => 'supports_other',
                 'type'        => 'string',
                 'description' => '',
                 'validator'   => $basicValidators['any']
@@ -215,6 +236,7 @@ class PsapIndexerController extends Controller
                 'name'        => 'notes',
                 'type'        => 'string',
                 'description' => 'Optional notes',
+                'sanitizer'   => $basicSanitizers['string'],
                 'validator'   => $basicValidators['string']
             ]
         ];
@@ -232,7 +254,7 @@ class PsapIndexerController extends Controller
         // execution time
         $tStart               = \microtime(true);
         $apiResponse          = \file_get_contents($this->apiEndpoint);
-        $apiTargetSheetNumber = 2;
+        $apiTargetSheetNumber = 1;
 
         if ($apiResponse !== false) {
 
