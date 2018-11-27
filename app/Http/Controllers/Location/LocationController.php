@@ -32,6 +32,7 @@ class LocationController extends Controller
      */
     public function index(Request $request)
     {
+        dd($_SERVER);
         $clientIp    = $request->get('ip') ?: $_SERVER['X-Forwarded-For'] ?? $_SERVER['REMOTE_ADDR'];
         $apiEndpoint = str_replace('${IP_ADDR}', $clientIp, $this->apiEndpoint);
 
