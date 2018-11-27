@@ -32,8 +32,19 @@ class LocationController extends Controller
      */
     public function index(Request $request)
     {
-        dd($_SERVER);
-        $clientIp    = $request->get('ip') ?: $_SERVER['X-Forwarded-For'] ?? $_SERVER['REMOTE_ADDR'];
+        $clientIp = $request->get('ip');
+
+        if ($clientIp === null) {
+            $clientIp = $_SERVER['REMOTE_ADDR'];
+
+            // Grab actual client IP, this will be the first in
+            // a comma-delimited list on Heroku
+            // See https://stackoverflow.com/a/37061471/2535504
+            if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+                $clientIp = \array_first(explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']));
+            }
+        }
+        
         $apiEndpoint = str_replace('${IP_ADDR}', $clientIp, $this->apiEndpoint);
 
         $jsonResponse = \file_get_contents($apiEndpoint);
