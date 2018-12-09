@@ -26,7 +26,7 @@ class LookupController extends Controller
      */
     protected function isValidZip(string $input)
     {
-        return \is_numeric($input) && \strlen($input) <= 5;
+        return \is_numeric($input) && \strlen($input) === 5;
     }
 
     /**
@@ -87,7 +87,7 @@ class LookupController extends Controller
     {
         if (!$this->isValidZip($zip)) {
             return Response::json([
-                'errors' => ['Input must be numeric and less than or equal to five characters']
+                'errors' => ['Input must be numeric and five digits']
             ], 400);
         }
 
@@ -138,7 +138,9 @@ class LookupController extends Controller
         ])->inRandomOrder();
 
         if ($search = $request->input('search')) {
-            $query->where('city', 'ILIKE', '%' . $search . '%');
+            $query->where('city', 'ILIKE', '%' . $search . '%')
+                ->orWhere('state', 'ILIKE', '%' . $search . '%')
+                ->orWhere('name', 'ILIKE', '%' . $search . '%');
 
             if ($this->isValidZip($search)) {
                 $query->orWhere('zip', 'ILIKE', '%' . $search . '%');
