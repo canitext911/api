@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Models\Psap;
 use Box\Spout\Common\Type;
 use Box\Spout\Reader\ReaderFactory;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Response;
 
@@ -14,16 +13,17 @@ class PsapIndexerController extends Controller
 {
     private $apiEndpoint = null;
     private $apiFormat   = null;
-
-    private $tempStorage = '../storage/app/temp';
+    private $tempStorage = null;
 
     /**
-     * LookupController constructor.
+     * PsapIndexerController constructor.
+     * @param string $tempStorage Path to store temp files
      */
-    public function __construct()
+    public function __construct(string $tempStorage = '../storage/app/temp')
     {
         parent::__construct();
 
+        $this->tempStorage = $tempStorage;
         $this->apiEndpoint = \env('CIT_TEXT_REGISTRY_ENDPOINT');
         if (!$this->apiEndpoint) {
             throw new \Error('.env missing registry endpoint');
@@ -243,13 +243,10 @@ class PsapIndexerController extends Controller
     }
 
     /**
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     * @throws \Box\Spout\Common\Exception\IOException
-     * @throws \Box\Spout\Common\Exception\UnsupportedTypeException
-     * @throws \Box\Spout\Reader\Exception\ReaderNotOpenedException
+     * @param bool $returnsHttpResponse Default when accessed via HTTP. Changes to string when accessed via CLI
+     * @return \Illuminate\Http\returnsHttpResponse
      */
-    public function index(Request $request)
+    public function index(bool $returnsHttpResponse = true)
     {
         // execution time
         $tStart               = \microtime(true);
@@ -346,7 +343,7 @@ class PsapIndexerController extends Controller
                             ]
                         ]);
                     }
-                    return Response::json([
+                    $response = [
                         'stats' => [
                             'total_results'      => count($formattedResults),
                             'total_rows'         => $rowCount,
@@ -361,23 +358,46 @@ class PsapIndexerController extends Controller
                             ),
                             'skipped_log'        => $skippedRows
                         ]
-                    ], 200);
+                    ];
+
+                    if ($returnsHttpResponse) {
+                        return Response::json($response, 200);
+                    }
+
+                    return \json_encode($response);
                 } else {
-                    return Response::json([
+                    $response = [
                         'status'   => 'Data did not load or match known format',
                         'endpoint' => $this->apiEndpoint
-                    ], 502);
+                    ];
+
+                    if ($returnsHttpResponse) {
+                        return Response::json($response, 502);
+                    }
+
+                    return \json_encode($response);
                 }
             } catch (\Exception $err) {
-                return Response::json([
+                $response = [
                     'status' => 'Internal Server Error: ' . $err->getMessage()
-                ], 500);
+                ];
+
+                if ($returnsHttpResponse) {
+                    Response::json($response, 500);
+                }
+
+                return \json_encode($response);
             }
         }
-
-        return Response::json([
+        $response = [
             'status'   => 'Service Unavailable',
             'endpoint' => $this->apiEndpoint
-        ], 502);
+        ];
+
+        if ($returnsHttpResponse) {
+            return Response::json($response, 502);
+        }
+
+        return \json_encode($response);
     }
 }
