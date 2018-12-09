@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Lookup;
 
 use App\Http\Controllers\Controller;
 use App\Http\Models\Psap;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 
@@ -18,7 +19,19 @@ class LookupController extends Controller
     }
 
     /**
+     * Check zip code validity
+     *
+     * @param string $input
+     * @return bool
+     */
+    protected function isValidZip(string $input)
+    {
+        return \is_numeric($input) && \strlen($input) <= 5;
+    }
+
+    /**
      * Basic search
+     *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
@@ -28,7 +41,8 @@ class LookupController extends Controller
 
         // basic city + zip search
         if ($search = $request->input('search')) {
-            if (\is_numeric($search)) {
+            // postgres doesn't play nice with mixed types or invalid integers
+            if (\is_numeric($search) && \strlen($search) <= 5) {
                 $query->where('zip', \intval($search));
             } else {
                 $query->where('city', 'ILIKE', '%' . $search . '%')
@@ -44,49 +58,67 @@ class LookupController extends Controller
     /**
      * Retrieve record by id
      *
-     * @param int $id
+     * @param string $id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function show(int $id)
+    public function show(string $id)
     {
-        $psap = Psap::where('id', $id)->first();
+        try {
+            $psap = Psap::where('id', $id)->first();
 
-        if ($psap !== null) {
-            return Response::json($psap, 200);
+            if ($psap !== null) {
+                return Response::json($psap, 200);
+            }
+        } catch (QueryException $exception) {
         }
 
         return Response::json([
-            'status' => 'Record Not Found'
+            'errors' => ['Record Not Found']
         ], 404);
     }
 
     /**
      * Return records filtered by zip code
      *
-     * @param int $zip
+     * @param string $zip
      * @return \Illuminate\Http\JsonResponse
      */
-    public function byZip(int $zip)
+    public function byZip(string $zip)
     {
+        if (!$this->isValidZip($zip)) {
+            return Response::json([
+                'errors' => ['Input must be numeric and less than or equal to five characters']
+            ], 400);
+        }
+
         return Response::json(Psap::where('zip', $zip)->paginate(), 200);
     }
 
     /**
-     * Retrieve record by psap_id
+     * Filter records by PSAP ID
      *
-     * @param int $psapId
+     * @param string $psapId
      * @return \Illuminate\Http\JsonResponse
      */
-    public function byPsaId(int $psapId)
+    public function byPsaId(string $psapId)
     {
-        $psap = Psap::where('psap_id', $psapId)->first();
+        if (!\is_numeric($psapId)) {
+            return Response::json([
+                'errors' => ['Input must be an integer']
+            ], 400);
+        }
 
-        if ($psap !== null) {
-            return Response::json($psap, 200);
+        try {
+            $psap = Psap::where('psap_id', $psapId)->first();
+
+            if ($psap !== null) {
+                return Response::json($psap, 200);
+            }
+        } catch (QueryException $exception) {
         }
 
         return Response::json([
-            'status' => 'Record Not Found. Note the difference between `id` and `psap_id`'
+            'errors' => ['Record Not Found. Note the difference between `id` and `psap_id`']
         ], 404);
     }
 
@@ -94,6 +126,7 @@ class LookupController extends Controller
      * Suggest similar queries for autocomplete
      *
      * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
      */
     public function suggest(Request $request)
     {
@@ -105,8 +138,11 @@ class LookupController extends Controller
         ])->inRandomOrder();
 
         if ($search = $request->input('search')) {
-            $query->where('city', 'ILIKE', '%' . $search . '%')
-                ->orWhere('zip', 'ILIKE', '%' . $search . '%');
+            $query->where('city', 'ILIKE', '%' . $search . '%');
+
+            if ($this->isValidZip($search)) {
+                $query->orWhere('zip', 'ILIKE', '%' . $search . '%');
+            }
         }
 
         return Response::json($query->paginate(4), 200);

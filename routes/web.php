@@ -37,7 +37,7 @@ $router->group([
     'namespace'  => 'PsapIndexer',
     'prefix'     => 'psap-indexer',
     'as'         => 'psapIndexer.',
-    'middleware' => 'throttle:1,1'
+    'middleware' => 'throttle:1,60'
 ], function () use ($router) {
     $router->get('', ['uses' => 'PsapIndexerController@index', 'name' => 'index']);
 });
