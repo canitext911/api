@@ -45,10 +45,14 @@ class LookupController extends Controller
             if (\is_numeric($search) && \strlen($search) <= 5) {
                 $query->where('zip', \intval($search));
             } else {
-                $query->where('city', 'ILIKE', '%' . $search . '%')
-                    ->orWhere('county', 'ILIKE', '%' . $search . '%')
-                    ->orWhere('state', 'ILIKE', '%' . $search . '%')
-                    ->orWhere('name', 'ILIKE', '%' . $search . '%');
+                // state abbreviations, try to limit the noise
+                if (\strlen($search) === 2) {
+                    $query->where('state', 'ILIKE', '%' . $search . '%');
+                } else {
+                    $query->where('city', 'ILIKE', '%' . $search . '%')
+                        ->orWhere('county', 'ILIKE', '%' . $search . '%')
+                        ->orWhere('name', 'ILIKE', '%' . $search . '%');
+                }
             }
         }
 
