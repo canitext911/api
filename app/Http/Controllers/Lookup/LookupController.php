@@ -29,6 +29,9 @@ class LookupController extends Controller
         // basic city + zip search
         if ($search = $request->input('search')) {
             $query->where('city', 'LIKE', '%' . $search . '%')
+                ->orWhere('county', 'LIKE', '%' . $search . '%')
+                ->orWhere('state', 'LIKE', '%' . $search . '%')
+                ->orWhere('name', 'LIKE', '%' . $search . '%')
                 ->orWhere('zip', $search);
         }
 

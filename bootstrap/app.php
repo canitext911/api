@@ -64,7 +64,8 @@ $app->singleton(
 
 $app->routeMiddleware([
     //'auth' => App\Http\Middleware\Authenticate::class,
-    'throttle' => App\Http\Middleware\ThrottleRequests::class
+    'throttle' => App\Http\Middleware\ThrottleRequests::class,
+    'cors'     => App\Http\Middleware\Cors::class
 ]);
 
 /*

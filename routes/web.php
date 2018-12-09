@@ -15,7 +15,7 @@ $router->get('/', function () use ($router) {
     return $router->app->version();
 });
 
-$router->group(['prefix' => 'v1', 'middleware' => 'throttle:60,1'], function () use ($router) {
+$router->group(['prefix' => 'v1', 'middleware' => ['throttle:60,1', 'cors']], function () use ($router) {
 
     // Location
     $router->group(['namespace' => 'Location', 'prefix' => 'location', 'as' => 'location.'], function () use ($router) {
