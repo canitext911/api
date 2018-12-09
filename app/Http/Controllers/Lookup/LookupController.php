@@ -28,11 +28,14 @@ class LookupController extends Controller
 
         // basic city + zip search
         if ($search = $request->input('search')) {
-            $query->where('city', 'ILIKE', '%' . $search . '%')
-                ->orWhere('county', 'ILIKE', '%' . $search . '%')
-                ->orWhere('state', 'ILIKE', '%' . $search . '%')
-                ->orWhere('name', 'ILIKE', '%' . $search . '%')
-                ->orWhere('zip', $search);
+            if (\is_numeric($search)) {
+                $query->where('zip', \intval($search));
+            } else {
+                $query->where('city', 'ILIKE', '%' . $search . '%')
+                    ->orWhere('county', 'ILIKE', '%' . $search . '%')
+                    ->orWhere('state', 'ILIKE', '%' . $search . '%')
+                    ->orWhere('name', 'ILIKE', '%' . $search . '%');
+            }
         }
 
         return Response::json($query->paginate(), 200);
