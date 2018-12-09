@@ -28,10 +28,10 @@ class LookupController extends Controller
 
         // basic city + zip search
         if ($search = $request->input('search')) {
-            $query->where('city', 'LIKE', '%' . $search . '%')
-                ->orWhere('county', 'LIKE', '%' . $search . '%')
-                ->orWhere('state', 'LIKE', '%' . $search . '%')
-                ->orWhere('name', 'LIKE', '%' . $search . '%')
+            $query->where('city', 'ILIKE', '%' . $search . '%')
+                ->orWhere('county', 'ILIKE', '%' . $search . '%')
+                ->orWhere('state', 'ILIKE', '%' . $search . '%')
+                ->orWhere('name', 'ILIKE', '%' . $search . '%')
                 ->orWhere('zip', $search);
         }
 
@@ -102,8 +102,8 @@ class LookupController extends Controller
         ])->inRandomOrder();
 
         if ($search = $request->input('search')) {
-            $query->where('city', 'LIKE', '%' . $search . '%')
-                ->orWhere('zip', 'LIKE', '%' . $search . '%');
+            $query->where('city', 'ILIKE', '%' . $search . '%')
+                ->orWhere('zip', 'ILIKE', '%' . $search . '%');
         }
 
         return Response::json($query->paginate(4), 200);
