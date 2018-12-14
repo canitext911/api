@@ -11,14 +11,6 @@ use Illuminate\Support\Facades\Response;
 class LookupController extends Controller
 {
     /**
-     * LookupController constructor.
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
-    /**
      * Check zip code validity
      *
      * @param string $input
@@ -124,33 +116,5 @@ class LookupController extends Controller
         return Response::json([
             'errors' => ['Record Not Found. Note the difference between `id` and `psap_id`']
         ], 404);
-    }
-
-    /**
-     * Suggest similar queries for autocomplete
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function suggest(Request $request)
-    {
-        $query = Psap::select([
-            'city',
-            'zip',
-            'state',
-            'name'
-        ])->inRandomOrder();
-
-        if ($search = $request->input('search')) {
-            $query->where('city', 'ILIKE', '%' . $search . '%')
-                ->orWhere('state', 'ILIKE', '%' . $search . '%')
-                ->orWhere('name', 'ILIKE', '%' . $search . '%');
-
-            if ($this->isValidZip($search)) {
-                $query->orWhere('zip', 'ILIKE', '%' . $search . '%');
-            }
-        }
-
-        return Response::json($query->paginate(4), 200);
     }
 }
