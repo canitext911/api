@@ -26,27 +26,29 @@ class LookupController extends Controller
         $query = Psap::query()
             ->orderBy('name');
 
-        // basic city + zip search
-        if ($search = $request->input('search')) {
-            // postgres doesn't play nice with mixed types or invalid integers
-            if ($this->isValidZip($search)) {
-                $query->where('zip', \intval($search));
+        $search = $request->input('search');
+
+        if ($search !== null) {
+            $cleanSearch = \trim($search);
+
+            if ($this->isValidZip($cleanSearch)) {
+                $query->where('zip', \intval($cleanSearch));
             } else {
                 $stateAbbreviation = null;
 
                 // try parsing state
-                if ($this->isValidStateAbbreviation($search)) {
-                    $stateAbbreviation = $search;
+                if ($this->isValidStateAbbreviation($cleanSearch)) {
+                    $stateAbbreviation = $cleanSearch;
                 } else {
-                    $stateAbbreviation = $this->getStateAbbreviationFromString($search);
+                    $stateAbbreviation = $this->getStateAbbreviationFromString($cleanSearch);
                 }
 
                 if ($stateAbbreviation !== null) {
                     $query->where('state', 'ILIKE', '%' . $stateAbbreviation . '%');
                 } else {
-                    $query->where('city', 'ILIKE', '%' . $search . '%')
-                        ->orWhere('county', 'ILIKE', '%' . $search . '%')
-                        ->orWhere('name', 'ILIKE', '%' . $search . '%');
+                    $query->where('city', 'ILIKE', '%' . $cleanSearch . '%')
+                        ->orWhere('county', 'ILIKE', '%' . $cleanSearch . '%')
+                        ->orWhere('name', 'ILIKE', '%' . $cleanSearch . '%');
                 }
             }
         }
