@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Nearby;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Psap;
 use App\Http\Traits\fetchLocationFromRequest;
+use App\Http\Traits\isValidZip;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
@@ -12,10 +13,12 @@ use Illuminate\Support\Facades\Response;
 class NearbyController extends Controller
 {
     use fetchLocationFromRequest;
+    use isValidZip;
 
     /**
-     * Index ordered by readiness date DESC
+     * Get nearby PSAPs based on IP geolocation
      *
+     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function index(Request $request)
@@ -33,7 +36,7 @@ class NearbyController extends Controller
 
         $query = Psap::query();
 
-        if (\is_numeric($zip) && \strlen($zip) !== 5) {
+        if ($this->isValidZip($zip)) {
             $query->where('zip', $zip);
         }
 

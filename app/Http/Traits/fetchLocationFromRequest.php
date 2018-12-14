@@ -7,9 +7,17 @@ use Illuminate\Http\Request;
 
 trait fetchLocationFromRequest
 {
+    /**
+     * Fetch geolocation from request IP using external API
+     *
+     * @param Request $request
+     * @return array
+     * @throws Exception
+     */
     public function fetchLocationFromRequest(Request $request)
     {
         $endpoint = \env('CIT_IP_LOCATION_ENDPOINT');
+
         if (!$endpoint) {
             throw new Exception('.env missing IP geolocation endpoint');
         }
@@ -27,7 +35,7 @@ trait fetchLocationFromRequest
             }
         }
 
-        $parsedEndpoint = str_replace('${IP_ADDR}', $clientIp, $endpoint);
+        $parsedEndpoint = \str_replace('${IP_ADDR}', $clientIp, $endpoint);
         $jsonResponse   = \file_get_contents($parsedEndpoint);
 
         if ($jsonResponse === false) {

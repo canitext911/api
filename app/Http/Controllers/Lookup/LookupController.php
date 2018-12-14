@@ -4,22 +4,14 @@ namespace App\Http\Controllers\Lookup;
 
 use App\Http\Controllers\Controller;
 use App\Http\Models\Psap;
+use App\Http\Traits\isValidZip;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 
 class LookupController extends Controller
 {
-    /**
-     * Check zip code validity
-     *
-     * @param string $input
-     * @return bool
-     */
-    protected function isValidZip(string $input)
-    {
-        return \is_numeric($input) && \strlen($input) === 5;
-    }
+    use isValidZip;
 
     /**
      * Basic search
@@ -29,12 +21,13 @@ class LookupController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Psap::query();
+        $query = Psap::query()
+            ->orderBy('name');
 
         // basic city + zip search
         if ($search = $request->input('search')) {
             // postgres doesn't play nice with mixed types or invalid integers
-            if (\is_numeric($search) && \strlen($search) <= 5) {
+            if ($this->isValidZip($search)) {
                 $query->where('zip', \intval($search));
             } else {
                 // state abbreviations, try to limit the noise
