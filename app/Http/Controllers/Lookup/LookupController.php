@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Lookup;
 
 use App\Http\Controllers\Controller;
 use App\Http\Models\Psap;
+use App\Http\Traits\isValidStateAbbreviation;
 use App\Http\Traits\isValidZip;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\Response;
 class LookupController extends Controller
 {
     use isValidZip;
+    use isValidStateAbbreviation;
 
     /**
      * Basic search
@@ -30,9 +32,17 @@ class LookupController extends Controller
             if ($this->isValidZip($search)) {
                 $query->where('zip', \intval($search));
             } else {
-                // state abbreviations, try to limit the noise
-                if (\strlen($search) === 2) {
-                    $query->where('state', 'ILIKE', '%' . $search . '%');
+                $stateAbbreviation = null;
+
+                // try parsing state
+                if ($this->isValidStateAbbreviation($search)) {
+                    $stateAbbreviation = $search;
+                } else {
+                    $stateAbbreviation = $this->getStateAbbreviationFromString($search);
+                }
+
+                if ($stateAbbreviation !== null) {
+                    $query->where('state', 'ILIKE', '%' . $stateAbbreviation . '%');
                 } else {
                     $query->where('city', 'ILIKE', '%' . $search . '%')
                         ->orWhere('county', 'ILIKE', '%' . $search . '%')
