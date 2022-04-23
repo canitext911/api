@@ -209,6 +209,12 @@ class PsapIndexerController extends Controller
                 'validator'   => $basicValidators['bool']
             ],
             [
+                'name'        => 'supports_rtt',
+                'type'        => 'string',
+                'description' => 'Discarded',
+                'validator'   => $basicValidators['any']
+            ],
+            [
                 'name'        => 'supports_other',
                 'type'        => 'string',
                 'description' => '',
