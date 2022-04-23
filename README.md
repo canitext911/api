@@ -11,11 +11,7 @@ Lumen-powered backend for [api.canitext911.us](https://api.canitext911.us).
 ``` dotenv
 # database config
 DB_CONNECTION=pgsql
-DB_HOST=<host>
-DB_PORT=<port>
-DB_DATABASE=<database>
-DB_USERNAME=<username>
-DB_PASSWORD=<password>
+DATABASE_URL=postgres://username:password@host:5432/database
 
 # service endpoints
 CIT_IP_LOCATION_ENDPOINT='http://ip-api.com/json/${IP_ADDR}'

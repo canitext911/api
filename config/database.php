@@ -57,11 +57,11 @@ return [
 
         'pgsql' => [
             'driver' => 'pgsql',
-            'host' => env('DATABASE_URL', '127.0.0.1'),
-            'port' => env('DB_PORT', 5432),
-            'database' => env('DB_DATABASE', 'forge'),
-            'username' => env('DB_USERNAME', 'forge'),
-            'password' => env('DB_PASSWORD', ''),
+            'host' => parse_url(env('DATABASE_URL'), PHP_URL_HOST),
+            'port' => parse_url(env('DATABASE_URL'), PHP_URL_PORT),
+            'database' => substr(parse_url(env('DATABASE_URL'), PHP_URL_PATH), 1),
+            'username' => parse_url(env('DATABASE_URL'), PHP_URL_USER),
+            'password' => parse_url(env('DATABASE_URL'), PHP_URL_PASS),
             'charset' => env('DB_CHARSET', 'utf8'),
             'prefix' => env('DB_PREFIX', ''),
             'schema' => env('DB_SCHEMA', 'public'),
