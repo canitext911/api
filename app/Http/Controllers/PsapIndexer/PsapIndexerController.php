@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Models\Psap;
 use Box\Spout\Common\Type;
 use Box\Spout\Reader\ReaderFactory;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Response;
 
@@ -357,7 +358,7 @@ class PsapIndexerController extends Controller
                             'processed_in'       => \microtime(true) - $tStart,
                             'duplicate_psap_ids' => \array_filter(
                                 \array_count_values(
-                                    \array_pluck($formattedResults, 'psap_id')),
+                                    Arr::pluck($formattedResults, 'psap_id')),
                                 function ($value) {
                                     return $value > 1;
                                 }

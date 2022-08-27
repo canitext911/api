@@ -4,6 +4,7 @@ namespace App\Http\Traits;
 
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 
 trait fetchLocationFromRequest
 {
@@ -31,7 +32,7 @@ trait fetchLocationFromRequest
             // a comma-delimited list on Heroku
             // See https://stackoverflow.com/a/37061471/2535504
             if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-                $clientIp = \array_first(explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']));
+                $clientIp = Arr::first(explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']));
             }
         }
 
