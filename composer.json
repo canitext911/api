@@ -7,8 +7,8 @@
     "require": {
         "php": ">=7.1.3",
         "box/spout": "^2.7",
-        "illuminate/routing": "^5.7",
-        "laravel/lumen-framework": "5.8.*"
+        "illuminate/routing": "^7",
+        "laravel/lumen-framework": "^7"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",

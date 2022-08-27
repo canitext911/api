@@ -1,5 +1,7 @@
 <?php
 
+date_default_timezone_set(env('APP_TIMEZONE', 'UTC'));
+
 require_once __DIR__ . '/../vendor/autoload.php';
 
 (new Laravel\Lumen\Bootstrap\LoadEnvironmentVariables(
