@@ -5,7 +5,7 @@ namespace App\Http\Controllers\PsapIndexer;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Psap;
 use Box\Spout\Common\Type;
-use Box\Spout\Reader\ReaderFactory;
+use Box\Spout\Reader\Common\Creator\ReaderFactory;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Response;
@@ -268,7 +268,7 @@ class PsapIndexerController extends Controller
                 File::put($tempFilePath, $apiResponse);
 
                 // read
-                $reader = ReaderFactory::create(Type::XLSX);
+                $reader = ReaderFactory::createFromType(Type::XLSX);
                 $reader->open($tempFilePath);
 
                 $formattedResults = [];
@@ -281,7 +281,7 @@ class PsapIndexerController extends Controller
                     if ($sheetNumber === $apiTargetSheetNumber) {
                         foreach ($sheet->getRowIterator() as $row) {
                             // pad row if needed
-                            $sanitizedRow = \array_pad($row, \count($this->apiFormat), null);
+                            $sanitizedRow = \array_pad($row->toArray(), \count($this->apiFormat), null);
                             $pass         = true;
 
                             // loop based on map, instead of row, guaranteeing strict

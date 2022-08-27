@@ -6,7 +6,7 @@
     "type": "project",
     "require": {
         "php": "^8.0",
-        "box/spout": "^2.7",
+        "box/spout": "^3.3",
         "illuminate/routing": "^9",
         "laravel/lumen-framework": "^9"
     },
