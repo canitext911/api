@@ -41,7 +41,7 @@ class NearbyController extends Controller
         }
 
         if ($city !== null) {
-            $query->orWhere('city', 'ILIKE', '%' . $city . '%');
+            $query->orWhere('city', 'LIKE', '%' . $city . '%');
         }
 
         return Response::json($query->paginate(5), 200);
