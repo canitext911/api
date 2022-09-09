@@ -25,12 +25,12 @@ class SuggestController extends Controller
         ])->inRandomOrder();
 
         if ($search = $request->input('search')) {
-            $query->where('city', 'LIKE', '%' . $search . '%')
-                ->orWhere('state', 'LIKE', '%' . $search . '%')
-                ->orWhere('name', 'LIKE', '%' . $search . '%');
+            $query->where('city', 'ILIKE', '%' . $search . '%')
+                ->orWhere('state', 'ILIKE', '%' . $search . '%')
+                ->orWhere('name', 'ILIKE', '%' . $search . '%');
 
             if ($this->isValidZip($search)) {
-                $query->orWhere('zip', 'LIKE', '%' . $search . '%');
+                $query->orWhere('zip', 'ILIKE', '%' . $search . '%');
             }
         }
 

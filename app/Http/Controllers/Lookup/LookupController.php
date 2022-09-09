@@ -44,11 +44,11 @@ class LookupController extends Controller
                 }
 
                 if ($stateAbbreviation !== null) {
-                    $query->where('state', 'LIKE', '%' . $stateAbbreviation . '%');
+                    $query->where('state', 'ILIKE', '%' . $stateAbbreviation . '%');
                 } else {
-                    $query->where('city', 'LIKE', '%' . $cleanSearch . '%')
-                        ->orWhere('county', 'LIKE', '%' . $cleanSearch . '%')
-                        ->orWhere('name', 'LIKE', '%' . $cleanSearch . '%');
+                    $query->where('city', 'ILIKE', '%' . $cleanSearch . '%')
+                        ->orWhere('county', 'ILIKE', '%' . $cleanSearch . '%')
+                        ->orWhere('name', 'ILIKE', '%' . $cleanSearch . '%');
                 }
             }
         }
