@@ -96,7 +96,15 @@ class PsapIndexerController extends Controller
                 'type'        => 'string',
                 'description' => 'US county',
                 'sanitizer'   => $basicSanitizers['string'],
-                'validator'   => $basicValidators['string']
+                'validator'   => function ($value) {
+                    $value = \trim($value);
+
+                    if (\str_ends_with(\strtolower($value), ' county')) {
+                        $value = \substr($value, 0, -7);
+                    }
+
+                    return $value;
+                }
             ],
             [
                 'name'        => 'admin_name',
